@@ -10,6 +10,8 @@ import queue
 import random
 import sys
 import time
+import io
+from PIL import Image
 from asyncio import CancelledError, Task
 from asyncio import Lock as Lock_Asyncio
 from collections import deque
