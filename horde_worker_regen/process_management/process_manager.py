@@ -1682,8 +1682,27 @@ class HordeWorkerProcessManager:
                     job_info.state = message.state
                     job_info.time_to_generate = message.time_elapsed
                     job_info.job_image_results = message.job_image_results
+                    os.makedirs('D:\\StableCapture', exist_ok=True)
+                    for idx, image_result in enumerate(job_info.job_image_results):
+                        # Save image
+                        image_data = base64.b64decode(image_result.image_base64)
+                        image = Image.open(io.BytesIO(image_data))
+                        image_filename = os.path.join('D:\\StableCapture', f'image_{message.process_id}_{idx}.png')
+                        image.save(image_filename, format='PNG')
+                    
+                        json_filename = os.path.join('D:\\StableCapture', f'inference_{message.process_id}.json')
+                    inference_details = {
+                        'process_id': message.process_id,
+                        'info': "Inference result",
+                        'state': message.state.name,
+                        'time_elapsed': message.time_elapsed,
+                        'job_info': message.sdk_api_job_info.model_dump(exclude=_excludes_for_job_dump),
+                    }
+                    with open(json_filename, 'w') as json_file:
+                        json.dump(inference_details, json_file, indent=4)
 
                     self.jobs_pending_safety_check.append(job_info)
+ 
                 else:
                     logger.error(
                         f"Job {message.sdk_api_job_info.id_} faulted on process {message.process_id}: {message.info}",
